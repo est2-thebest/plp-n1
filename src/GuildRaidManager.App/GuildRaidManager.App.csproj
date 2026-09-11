@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>GuildRaidManager.App</RootNamespace>
+    <AssemblyName>GuildRaidManager.App</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GuildRaidManager.Domain\GuildRaidManager.Domain.csproj" />
+  </ItemGroup>
+</Project>

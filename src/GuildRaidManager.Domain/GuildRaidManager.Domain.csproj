@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>GuildRaidManager.Domain</RootNamespace>
+    <AssemblyName>GuildRaidManager.Domain</AssemblyName>
+  </PropertyGroup>
+</Project>

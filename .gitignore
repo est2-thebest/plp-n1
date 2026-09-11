@@ -1,0 +1,47 @@
+## Build
+bin/
+obj/
+out/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+*.dll
+*.exe
+*.pdb
+*.cache
+
+## NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## IDE / OS
+.vs/
+.idea/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+.DS_Store
+Thumbs.db
+
+## Test / coverage
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+coverage.json
+coverage.cobertura.xml
+
+## Secrets / local
+.env
+.env.*
+appsettings.*.local.json
+*.pfx
+*.key
+secrets.json
