@@ -3,9 +3,15 @@ const backends = {
   erlang: "http://localhost:8080",
 };
 
+function backendAtual() {
+  return document.getElementById("backend")?.value ?? "mock";
+}
+
 function apiBase() {
-  const select = document.getElementById("backend");
-  return backends[select?.value ?? "csharp"];
+  if (backendAtual() === "mock") {
+    return "mock (só a tela — não é C# nem Erlang)";
+  }
+  return backends[backendAtual()];
 }
 
 async function request(path, options = {}) {
@@ -39,32 +45,48 @@ async function request(path, options = {}) {
   return body;
 }
 
-const api = {
-  listarJogadores: () => request("/jogadores"),
-  cadastrarJogador: (jogador) =>
-    request("/jogadores", { method: "POST", body: JSON.stringify(jogador) }),
-  obterHistorico: (id) => request(`/jogadores/${id}/historico`),
+function chamar(nome, ...args) {
+  if (backendAtual() === "mock") {
+    return Promise.resolve().then(() => mockApi[nome](...args));
+  }
+  return null;
+}
 
-  listarRaids: () => request("/raids"),
-  criarRaid: (raid) => request("/raids", { method: "POST", body: JSON.stringify(raid) }),
-  obterRaid: (id) => request(`/raids/${id}`),
+const api = {
+  listarJogadores: () => chamar("listarJogadores") ?? request("/jogadores"),
+  cadastrarJogador: (jogador) =>
+    chamar("cadastrarJogador", jogador) ??
+    request("/jogadores", { method: "POST", body: JSON.stringify(jogador) }),
+  obterHistorico: (id) =>
+    chamar("obterHistorico", id) ?? request(`/jogadores/${id}/historico`),
+
+  listarRaids: () => chamar("listarRaids") ?? request("/raids"),
+  criarRaid: (raid) =>
+    chamar("criarRaid", raid) ??
+    request("/raids", { method: "POST", body: JSON.stringify(raid) }),
+  obterRaid: (id) => chamar("obterRaid", id) ?? request(`/raids/${id}`),
 
   inscrever: (raidId, jogadorId) =>
+    chamar("inscrever", raidId, jogadorId) ??
     request(`/raids/${raidId}/inscricoes`, {
       method: "POST",
       body: JSON.stringify({ jogadorId }),
     }),
   removerInscricao: (raidId, jogadorId) =>
+    chamar("removerInscricao", raidId, jogadorId) ??
     request(`/raids/${raidId}/inscricoes/${jogadorId}`, { method: "DELETE" }),
 
   registrarPresenca: (raidId, jogadorIds) =>
+    chamar("registrarPresenca", raidId, jogadorIds) ??
     request(`/raids/${raidId}/presenca`, {
       method: "POST",
       body: JSON.stringify({ jogadorIds }),
     }),
 
   registrarLoot: (raidId, item) =>
+    chamar("registrarLoot", raidId, item) ??
     request(`/raids/${raidId}/loots`, { method: "POST", body: JSON.stringify(item) }),
   distribuirLoot: (raidId, itemId) =>
+    chamar("distribuirLoot", raidId, itemId) ??
     request(`/raids/${raidId}/loots/${itemId}/distribuir`, { method: "POST" }),
 };

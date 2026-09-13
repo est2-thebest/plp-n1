@@ -1,166 +1,16 @@
-const estado = {
-  jogadores: [],
-  raids: [],
-  raid: null,
-};
-
-const el = {
-  status: document.getElementById("status"),
-  listaJogadores: document.getElementById("lista-jogadores"),
-  listaRaids: document.getElementById("lista-raids"),
-  painelRaid: document.getElementById("painel-raid"),
-  raidTitulo: document.getElementById("raid-titulo"),
-  raidResumo: document.getElementById("raid-resumo"),
-  selectInscricao: document.getElementById("select-inscricao"),
-  listaConfirmados: document.getElementById("lista-confirmados"),
-  listaFila: document.getElementById("lista-fila"),
-  checkPresenca: document.getElementById("check-presenca"),
-  listaParticipantes: document.getElementById("lista-participantes"),
-  listaLoots: document.getElementById("lista-loots"),
-  historico: document.getElementById("historico"),
-};
-
-function mostrarStatus(mensagem, tipo) {
-  el.status.hidden = !mensagem;
-  el.status.textContent = mensagem ?? "";
-  el.status.className = tipo ? `banner banner--${tipo}` : "banner";
-}
-
-function idDe(item) {
-  if (!item) {
-    return "";
-  }
-  if (typeof item === "string") {
-    return item;
-  }
-  return item.jogadorId ?? item.id ?? item.jogador?.id ?? "";
-}
-
-function nomeDe(item) {
-  const id = idDe(item);
-  const jogador = estado.jogadores.find((j) => j.id === id);
-  if (jogador) {
-    return `${jogador.nome} (${id}, ${jogador.funcao})`;
-  }
-  return item?.jogador?.nome ? `${item.jogador.nome} (${id})` : id;
-}
-
-async function comErro(acao) {
-  try {
-    await acao();
-    mostrarStatus("", "");
-  } catch (erro) {
-    mostrarStatus(erro.message, "erro");
-  }
-}
-
-function renderJogadores() {
-  if (estado.jogadores.length === 0) {
-    el.listaJogadores.innerHTML = '<p class="empty">Nenhum jogador cadastrado.</p>';
-    return;
-  }
-
-  el.listaJogadores.innerHTML = estado.jogadores
-    .map(
-      (j) =>
-        `<div class="row"><span>${j.nome} — ${j.id} · ${j.classe}<span class="tag tag--${j.funcao}">${j.funcao}</span></span></div>`,
-    )
-    .join("");
-}
-
-function renderRaids() {
-  if (estado.raids.length === 0) {
-    el.listaRaids.innerHTML = '<p class="empty">Nenhuma raid criada.</p>';
-    return;
-  }
-
-  el.listaRaids.innerHTML = estado.raids
-    .map((r) => {
-      const id = r.id;
-      return `<div class="row"><span>${r.nome} — ${id}</span><button class="btn btn--ghost" type="button" data-abrir="${id}">Abrir</button></div>`;
-    })
-    .join("");
-}
-
-function renderInscricaoOptions() {
-  el.selectInscricao.innerHTML = estado.jogadores
-    .map((j) => `<option value="${j.id}">${j.nome} (${j.funcao})</option>`)
-    .join("");
-}
-
-function renderListaInscritos(destino, inscritos, vazio) {
-  if (!inscritos || inscritos.length === 0) {
-    destino.innerHTML = `<p class="empty">${vazio}</p>`;
-    return;
-  }
-
-  const raidId = estado.raid.id;
-  destino.innerHTML = inscritos
-    .map((item) => {
-      const jogadorId = idDe(item);
-      const status = item.status ? ` · ${item.status}` : "";
-      return `<div class="row"><span>${nomeDe(item)}${status}</span><button class="btn btn--danger" type="button" data-remover="${jogadorId}" data-raid="${raidId}">Remover</button></div>`;
-    })
-    .join("");
-}
-
-function renderPresenca(confirmados) {
-  if (!confirmados || confirmados.length === 0) {
-    el.checkPresenca.innerHTML = '<p class="empty">Ninguém confirmado.</p>';
-    return;
-  }
-
-  el.checkPresenca.innerHTML = confirmados
-    .map((item) => {
-      const id = idDe(item);
-      return `<label class="row"><span>${nomeDe(item)}</span><input type="checkbox" name="presente" value="${id}" checked /></label>`;
-    })
-    .join("");
-}
-
-function renderLoots(loots) {
-  if (!loots || loots.length === 0) {
-    el.listaLoots.innerHTML = '<p class="empty">Nenhum item registrado.</p>';
-    return;
-  }
-
-  const raidId = estado.raid.id;
-  el.listaLoots.innerHTML = loots
-    .map((item) => {
-      const ganhador = item.ganhadorId ?? item.ganhador?.id;
-      const acao = ganhador
-        ? `<span class="empty">→ ${ganhador}</span>`
-        : `<button class="btn btn--ghost" type="button" data-distribuir="${item.id}" data-raid="${raidId}">Distribuir</button>`;
-      return `<div class="row"><span>${item.nome} (${item.id}) · ${item.funcaoRequerida ?? ""}</span>${acao}</div>`;
-    })
-    .join("");
-}
-
-function renderRaid() {
-  const raid = estado.raid;
-  if (!raid) {
-    el.painelRaid.hidden = true;
-    return;
-  }
-
-  el.painelRaid.hidden = false;
-  el.raidTitulo.textContent = `${raid.nome} (${raid.id})`;
-  el.raidResumo.textContent = `Vagas tank ${raid.limiteTank ?? "?"} · healer ${raid.limiteHealer ?? "?"} · dps ${raid.limiteDps ?? "?"}`;
-
-  const confirmados = raid.confirmados ?? raid.inscricoesConfirmadas ?? [];
-  const fila = raid.fila ?? raid.filaEspera ?? [];
-  const participantes = raid.participantesEfetivos ?? raid.participantes ?? [];
-  const loots = raid.loots ?? raid.itensLoot ?? [];
-
-  renderInscricaoOptions();
-  renderListaInscritos(el.listaConfirmados, confirmados, "Ninguém confirmado.");
-  renderListaInscritos(el.listaFila, fila, "Fila vazia.");
-  renderPresenca(confirmados);
-  renderLoots(loots);
-
-  el.listaParticipantes.textContent =
-    participantes.length === 0 ? "—" : participantes.map((p) => nomeDe(p)).join(", ");
-}
+document.querySelectorAll("form").forEach((form) => {
+  form.addEventListener("input", (evento) => {
+    const campo = evento.target.closest(".field");
+    if (!campo) {
+      return;
+    }
+    campo.classList.remove("field--invalido");
+    const aviso = campo.querySelector(".field__error");
+    if (aviso) {
+      aviso.textContent = "";
+    }
+  });
+});
 
 async function carregarJogadores() {
   const dados = await api.listarJogadores();
@@ -172,20 +22,30 @@ async function carregarJogadores() {
 async function carregarRaids() {
   const dados = await api.listarRaids();
   estado.raids = Array.isArray(dados) ? dados : dados?.raids ?? [];
+  renderFiltroRaids();
   renderRaids();
+  renderJogadores();
 }
 
-async function abrirRaid(id) {
+async function entrarNaRaid(id) {
   estado.raid = await api.obterRaid(id);
   renderRaid();
+  abrirModal("detalhe-raid");
 }
 
 async function recarregarTudo() {
+  if (backendAtual() === "mock") {
+    mock.reset();
+  }
+
+  const raidAberta = modalAberto("detalhe-raid") ? estado.raid?.id : null;
+
   await comErro(async () => {
     await carregarJogadores();
     await carregarRaids();
-    if (estado.raid?.id) {
-      await abrirRaid(estado.raid.id);
+    irPara(estado.pagina);
+    if (raidAberta) {
+      await entrarNaRaid(raidAberta);
     }
     mostrarStatus(`Conectado em ${apiBase()}.`, "ok");
   });
@@ -193,17 +53,64 @@ async function recarregarTudo() {
   if (el.status.classList.contains("banner--erro")) {
     estado.jogadores = [];
     estado.raids = [];
+    estado.raid = null;
+    fecharTodosOsModais();
+    renderFiltroRaids();
     renderJogadores();
     renderRaids();
-    el.painelRaid.hidden = true;
+    irPara("jogadores");
   }
 }
 
-document.getElementById("backend").addEventListener("change", recarregarTudo);
+document.getElementById("backend").addEventListener("change", () => {
+  estado.raid = null;
+  estado.pagina = "jogadores";
+  fecharTodosOsModais();
+  recarregarTudo();
+});
+
+document.getElementById("filtro-jogador-busca").addEventListener("input", (evento) => {
+  estado.filtros.jogadorBusca = evento.target.value;
+  renderJogadores();
+});
+
+document.getElementById("filtro-jogador-funcao").addEventListener("change", (evento) => {
+  estado.filtros.jogadorFuncao = evento.target.value;
+  renderJogadores();
+});
+
+document.getElementById("filtro-jogador-raid").addEventListener("change", (evento) => {
+  estado.filtros.jogadorRaid = evento.target.value;
+  renderJogadores();
+});
+
+document.getElementById("filtro-raid-busca").addEventListener("input", (evento) => {
+  estado.filtros.raidBusca = evento.target.value;
+  renderRaids();
+});
+
+document.getElementById("limpar-filtros-jogador").addEventListener("click", () => {
+  estado.filtros.jogadorBusca = "";
+  estado.filtros.jogadorFuncao = "";
+  estado.filtros.jogadorRaid = "";
+  document.getElementById("filtro-jogador-busca").value = "";
+  document.getElementById("filtro-jogador-funcao").value = "";
+  document.getElementById("filtro-jogador-raid").value = "";
+  renderJogadores();
+});
+
+document.getElementById("limpar-filtros-raid").addEventListener("click", () => {
+  estado.filtros.raidBusca = "";
+  document.getElementById("filtro-raid-busca").value = "";
+  renderRaids();
+});
 
 document.getElementById("form-jogador").addEventListener("submit", (evento) => {
   evento.preventDefault();
   const form = evento.target;
+  if (!formularioValido(form)) {
+    return;
+  }
   const jogador = {
     id: form.id.value.trim(),
     nome: form.nome.value.trim(),
@@ -213,7 +120,9 @@ document.getElementById("form-jogador").addEventListener("submit", (evento) => {
   comErro(async () => {
     await api.cadastrarJogador(jogador);
     form.reset();
+    limparErros(form);
     await carregarJogadores();
+    fecharModal("jogador");
     mostrarStatus("Jogador cadastrado.", "ok");
   });
 });
@@ -221,11 +130,13 @@ document.getElementById("form-jogador").addEventListener("submit", (evento) => {
 document.getElementById("form-raid").addEventListener("submit", (evento) => {
   evento.preventDefault();
   const form = evento.target;
-  const dataLocal = form.data.value;
+  if (!formularioValido(form)) {
+    return;
+  }
   const raid = {
     id: form.id.value.trim(),
     nome: form.nome.value.trim(),
-    data: dataLocal ? new Date(dataLocal).toISOString() : "",
+    data: form.data.value ? `${form.data.value}T21:00:00` : "",
     limiteTank: Number(form.limiteTank.value),
     limiteHealer: Number(form.limiteHealer.value),
     limiteDps: Number(form.limiteDps.value),
@@ -233,21 +144,40 @@ document.getElementById("form-raid").addEventListener("submit", (evento) => {
   comErro(async () => {
     await api.criarRaid(raid);
     form.reset();
+    limparErros(form);
     await carregarRaids();
+    fecharModal("raid");
     mostrarStatus("Raid criada.", "ok");
   });
 });
 
-el.listaRaids.addEventListener("click", (evento) => {
-  const id = evento.target.dataset.abrir;
+el.listaJogadores.addEventListener("click", (evento) => {
+  const id = evento.target.dataset.historico;
   if (!id) {
     return;
   }
-  comErro(() => abrirRaid(id));
+  comErro(async () => {
+    const dados = await api.obterHistorico(id);
+    const jogador = estado.jogadores.find((item) => item.id === id);
+    renderHistorico(dados, jogador);
+    abrirModal("historico");
+    mostrarStatus("Histórico carregado.", "ok");
+  });
+});
+
+el.listaRaids.addEventListener("click", (evento) => {
+  const id = evento.target.dataset.entrar;
+  if (!id) {
+    return;
+  }
+  comErro(() => entrarNaRaid(id));
 });
 
 document.getElementById("form-inscricao").addEventListener("submit", (evento) => {
   evento.preventDefault();
+  if (!formularioValido(evento.target)) {
+    return;
+  }
   const jogadorId = evento.target.jogadorId.value;
   const raidId = estado.raid?.id;
   if (!raidId) {
@@ -255,12 +185,13 @@ document.getElementById("form-inscricao").addEventListener("submit", (evento) =>
   }
   comErro(async () => {
     const resultado = await api.inscrever(raidId, jogadorId);
-    await abrirRaid(raidId);
+    await carregarRaids();
+    await entrarNaRaid(raidId);
     mostrarStatus(`Inscrição: ${resultado?.status ?? "ok"}.`, "ok");
   });
 });
 
-el.painelRaid.addEventListener("click", (evento) => {
+document.getElementById("modal-detalhe-raid").addEventListener("click", (evento) => {
   const remover = evento.target.dataset.remover;
   const distribuir = evento.target.dataset.distribuir;
   const raidId = evento.target.dataset.raid ?? estado.raid?.id;
@@ -268,7 +199,8 @@ el.painelRaid.addEventListener("click", (evento) => {
   if (remover && raidId) {
     comErro(async () => {
       await api.removerInscricao(raidId, remover);
-      await abrirRaid(raidId);
+      await carregarRaids();
+      await entrarNaRaid(raidId);
       mostrarStatus("Inscrição removida.", "ok");
     });
   }
@@ -276,7 +208,7 @@ el.painelRaid.addEventListener("click", (evento) => {
   if (distribuir && raidId) {
     comErro(async () => {
       const resultado = await api.distribuirLoot(raidId, distribuir);
-      await abrirRaid(raidId);
+      await entrarNaRaid(raidId);
       mostrarStatus(`Loot para ${resultado?.ganhadorId ?? "ganhador definido"}.`, "ok");
     });
   }
@@ -293,18 +225,21 @@ document.getElementById("form-presenca").addEventListener("submit", (evento) => 
   );
   comErro(async () => {
     await api.registrarPresenca(raidId, jogadorIds);
-    await abrirRaid(raidId);
+    await entrarNaRaid(raidId);
     mostrarStatus("Presença registrada.", "ok");
   });
 });
 
 document.getElementById("form-loot").addEventListener("submit", (evento) => {
   evento.preventDefault();
+  const form = evento.target;
+  if (!formularioValido(form)) {
+    return;
+  }
   const raidId = estado.raid?.id;
   if (!raidId) {
     return;
   }
-  const form = evento.target;
   const item = {
     id: form.id.value.trim(),
     nome: form.nome.value.trim(),
@@ -314,19 +249,14 @@ document.getElementById("form-loot").addEventListener("submit", (evento) => {
   comErro(async () => {
     await api.registrarLoot(raidId, item);
     form.reset();
-    await abrirRaid(raidId);
+    limparErros(form);
+    await entrarNaRaid(raidId);
     mostrarStatus("Item registrado.", "ok");
   });
 });
 
-document.getElementById("form-historico").addEventListener("submit", (evento) => {
-  evento.preventDefault();
-  const jogadorId = evento.target.jogadorId.value.trim();
-  comErro(async () => {
-    const dados = await api.obterHistorico(jogadorId);
-    el.historico.textContent = JSON.stringify(dados, null, 2);
-    mostrarStatus("Histórico carregado.", "ok");
-  });
+document.getElementById("modal-detalhe-raid").addEventListener("close", () => {
+  estado.raid = null;
 });
 
 recarregarTudo();
