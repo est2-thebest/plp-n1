@@ -18,8 +18,9 @@ O mesmo núcleo funcional é implementado em dois paradigmas:
 ## Estrutura
 
 ```
-csharp/    # solução .NET (Domain + console)
-erlang/    # aplicação rebar3
+csharp/      # solução .NET (Domain + console)
+erlang/      # aplicação rebar3
+frontend/    # HTML/CSS/JS compartilhado (C# ou Erlang)
 ```
 
 ## C#
@@ -39,4 +40,11 @@ rebar3 compile
 rebar3 shell
 ```
 
-Detalhes de cada lado: [csharp/README.md](csharp/README.md) e [erlang/README.md](erlang/README.md).
+## Frontend
+
+```bash
+cd frontend
+python3 -m http.server 5500
+```
+
+Detalhes: [csharp/README.md](csharp/README.md), [erlang/README.md](erlang/README.md) e [frontend/README.md](frontend/README.md).
