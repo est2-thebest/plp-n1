@@ -18,9 +18,13 @@ Abra http://localhost:5500
 ## Estrutura
 
 ```
-index.html    # tela inicial
-css/styles.css
-js/app.js     # troca a URL do backend (C# ou Erlang)
+index.html
+css/tokens.css       # cores e tipografia
+css/layout.css       # topo e grid
+css/components.css   # cards, forms, botões, listas
+css/styles.css       # junta os três arquivos
+js/api.js
+js/app.js
 ```
 
 Quando as APIs existirem, o seletor de backend aponta para `http://localhost:5000` (C#) ou `http://localhost:8080` (Erlang), com o mesmo JSON nos dois lados.

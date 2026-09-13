@@ -3,22 +3,36 @@ const backends = {
   erlang: "http://localhost:8080",
 };
 
-const select = document.getElementById("backend");
-
 function apiBase() {
+  const select = document.getElementById("backend");
   return backends[select?.value ?? "csharp"];
 }
 
 async function request(path, options = {}) {
-  const response = await fetch(`${apiBase()}${path}`, {
-    headers: { "Content-Type": "application/json", ...options.headers },
-    ...options,
-  });
+  let response;
 
-  const body = await response.json().catch(() => null);
+  try {
+    response = await fetch(`${apiBase()}${path}`, {
+      headers: { "Content-Type": "application/json", ...options.headers },
+      ...options,
+    });
+  } catch {
+    throw new Error(`Não conectou em ${apiBase()}. A API ainda não está no ar.`);
+  }
+
+  const texto = await response.text();
+  let body = null;
+  if (texto) {
+    try {
+      body = JSON.parse(texto);
+    } catch {
+      body = texto;
+    }
+  }
 
   if (!response.ok) {
-    const mensagem = body?.mensagem ?? `HTTP ${response.status}`;
+    const mensagem =
+      (body && body.mensagem) || (typeof body === "string" && body) || `HTTP ${response.status}`;
     throw new Error(mensagem);
   }
 
@@ -54,6 +68,3 @@ const api = {
   distribuirLoot: (raidId, itemId) =>
     request(`/raids/${raidId}/loots/${itemId}/distribuir`, { method: "POST" }),
 };
-
-window.apiBase = apiBase;
-window.api = api;

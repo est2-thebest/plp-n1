@@ -1,0 +1,41 @@
+:root {
+  --ink: #1c1710;
+  --muted: #6b5e4e;
+  --paper: #efe6d6;
+  --card: #fff8ee;
+  --line: #d9cbb6;
+  --header: #241c16;
+  --header-text: #f4e7d4;
+  --copper: #b4632a;
+  --copper-dark: #8a4318;
+  --moss: #2f5d45;
+  --danger: #8f2d24;
+  --danger-bg: #f8e4df;
+  --ok-bg: #e4efe6;
+  --ok: #245c38;
+  --shadow: 0 10px 30px rgba(36, 28, 22, 0.08);
+  --radius: 14px;
+  --font-display: "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+  --font-ui: "Segoe UI", system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--font-ui);
+  line-height: 1.45;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
