@@ -1,0 +1,1 @@
+%%Rotas: /raids/{id}/inscricoes e remoção

@@ -1,0 +1,1 @@
+%%Utilitário para parse JSON, CORS e respostas padronizadas

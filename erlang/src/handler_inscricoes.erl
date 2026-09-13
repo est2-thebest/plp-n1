@@ -1,0 +1,1 @@
+%%Rotas: /jogadores e /jogadores/{id}

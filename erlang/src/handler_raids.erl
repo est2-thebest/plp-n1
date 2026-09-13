@@ -1,0 +1,1 @@
+%%Rotas: /raids/{id}/loots e distribuição
