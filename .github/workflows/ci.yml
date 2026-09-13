@@ -12,10 +12,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          global-json-file: global.json
+          global-json-file: csharp/global.json
       - name: Restore
-        run: dotnet restore GuildRaidManager.sln
+        run: dotnet restore csharp/GuildRaidManager.sln
       - name: Build
-        run: dotnet build GuildRaidManager.sln --no-restore --configuration Release
+        run: dotnet build csharp/GuildRaidManager.sln --no-restore --configuration Release
       - name: Test
-        run: dotnet test GuildRaidManager.sln --no-build --configuration Release
+        run: dotnet test csharp/GuildRaidManager.sln --no-build --configuration Release

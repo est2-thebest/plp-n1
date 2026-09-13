@@ -1,37 +1,42 @@
-# Guild Raid Manager — C#
+# plp-n1
 
-Solução em **C# (POO)** da N1 de Paradigmas de Programação (SENAI FATESG).
+Sistema de gerenciamento de guildas e raids (N1 — Paradigmas de Programação, SENAI FATESG).
 
-A implementação equivalente em Erlang fica em outro repositório do grupo.
+O mesmo núcleo funcional é implementado em dois paradigmas:
 
-## Equipe (C#)
+- **C#** — programação orientada a objetos
+- **Erlang** — programação funcional e concorrente (modelo de atores)
 
-- Gabriella Pio
-- Eduarda Corazza
+## Equipe
 
-Grupo completo: Caio de Paula, Eduarda Corazza, Gabriella Pio, Luiz Gustavo Rocha.
-
-## Pré-requisitos
-
-- [.NET SDK 8](https://dotnet.microsoft.com/download/dotnet/8.0) ou superior
-
-```bash
-dotnet --version
-```
-
-## Como executar
-
-```bash
-dotnet restore
-dotnet build
-dotnet test
-dotnet run --project src/GuildRaidManager.App
-```
+| Parte | Pessoas |
+| --- | --- |
+| C# | Gabriella Pio, Eduarda Corazza |
+| Erlang | Caio de Paula, Luiz Gustavo Rocha |
+| Grupo | Caio de Paula, Eduarda Corazza, Gabriella Pio, Luiz Gustavo Rocha |
 
 ## Estrutura
 
 ```
-src/GuildRaidManager.Domain   # biblioteca de domínio
-src/GuildRaidManager.App      # aplicativo console
-tests/                        # testes xUnit
+csharp/    # solução .NET (Domain + console)
+erlang/    # aplicação rebar3
 ```
+
+## C#
+
+```bash
+cd csharp
+dotnet restore
+dotnet build
+dotnet run --project src/GuildRaidManager.App
+```
+
+## Erlang
+
+```bash
+cd erlang
+rebar3 compile
+rebar3 shell
+```
+
+Detalhes de cada lado: [csharp/README.md](csharp/README.md) e [erlang/README.md](erlang/README.md).
