@@ -18,9 +18,11 @@ O mesmo núcleo funcional é implementado em dois paradigmas:
 ## Estrutura
 
 ```
-csharp/      # solução .NET (Domain + console)
-erlang/      # aplicação rebar3
-frontend/    # HTML/CSS/JS compartilhado (C# ou Erlang)
+csharp/                    # solução .NET (Domain + console)
+erlang/                    # aplicação rebar3
+frontend/                  # HTML/CSS/JS compartilhado (C# ou Erlang)
+contrato-api.md            # mesmos endpoints/JSON para os dois backends
+exemplo-desenvolvimento.md # roteiro e JSON de exemplo para seguir
 ```
 
 ## C#
@@ -47,4 +49,4 @@ cd frontend
 python3 -m http.server 5500
 ```
 
-Detalhes: [csharp/README.md](csharp/README.md), [erlang/README.md](erlang/README.md) e [frontend/README.md](frontend/README.md).
+Detalhes: [csharp/README.md](csharp/README.md), [erlang/README.md](erlang/README.md), [frontend/README.md](frontend/README.md), [contrato-api.md](contrato-api.md) e [exemplo-desenvolvimento.md](exemplo-desenvolvimento.md).

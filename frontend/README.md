@@ -24,3 +24,7 @@ js/app.js     # troca a URL do backend (C# ou Erlang)
 ```
 
 Quando as APIs existirem, o seletor de backend aponta para `http://localhost:5000` (C#) ou `http://localhost:8080` (Erlang), com o mesmo JSON nos dois lados.
+
+Contrato compartilhado (caminhos, JSON, CORS): [`../contrato-api.md`](../contrato-api.md).
+
+O arquivo `js/api.js` já tem o `fetch` de cada endpoint. Sem os backends no ar, as chamadas falham — esperado até C# e Erlang subirem HTTP.
