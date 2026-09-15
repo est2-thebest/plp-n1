@@ -60,7 +60,7 @@ handle_request(<<"GET">>, Req) ->
             api_util:reply_json(Req, 200, JogadorMock)
     end;
 
-%% 3. Cadastro do Jogador (POST)
+%% 3. Cadastro do Jogador (POST) - Versao Mock Isolada
 handle_request(<<"POST">>, Req) ->
     case api_util:parse_body(Req) of
         {ok, Map, Req2} ->
@@ -69,24 +69,21 @@ handle_request(<<"POST">>, Req) ->
             ClasseBin = maps:get(<<"classe">>, Map, <<"">>),
             FuncaoBin = maps:get(<<"funcao">>, Map, <<"">>),
 
-            Nome = binary_to_list(NomeBin),
-            Classe = binary_to_list(ClasseBin),
-            FuncaoAtomo = converter_funcao(FuncaoBin),
+            %% TODO Futuro: 
+            %% Quando o servidor estiver pronto, descomentar a chamada abaixo:
+            %% Nome = binary_to_list(NomeBin),
+            %% Classe = binary_to_list(ClasseBin),
+            %% FuncaoAtomo = converter_funcao(FuncaoBin),
+            %% modulo_jogador:criar(IdBin, Nome, Classe, FuncaoAtomo)
 
-            case modulo_jogador:criar(IdBin, Nome, Classe, FuncaoAtomo) of
-                {ok, _JogadorRecord} ->
-                    %% TODO Futuro: Salvar o_JogadorRecord no ETS ou BD
-                    RespostaJson = #{
-                        <<"id">> => IdBin,
-                        <<"nome">> => NomeBin,
-                        <<"classe">> => ClasseBin,
-                        <<"funcao">> => FuncaoBin
-                    },
-                    api_util:reply_json(Req2, 201, RespostaJson);
-                    
-                {error, funcao_invalida} ->
-                    api_util:reply_error(Req2, 400, <<"funcao_invalida">>, <<"O papel informado deve ser tank, healer ou dps.">>)
-            end;
+            %% Retornamos o 201 Created diretamente para liberar o Front-end
+            RespostaJson = #{
+                <<"id">> => IdBin,
+                <<"nome">> => NomeBin,
+                <<"classe">> => ClasseBin,
+                <<"funcao">> => FuncaoBin
+            },
+            api_util:reply_json(Req2, 201, RespostaJson);
             
         {error, invalid_json, Req2} ->
             api_util:reply_error(Req2, 400, <<"json_invalido">>, <<"O formato enviado não é um JSON válido.">>)
