@@ -1,14 +1,8 @@
 {application, guild_raid, [
     {description, "Gerenciador de guildas e raids (Erlang) — N1 PLP"},
     {vsn, "0.1.0"},
+    {modules, []},
     {registered, []},
-    {mod, {guild_raid_app, []}},
-    {applications, [
-        kernel,
-        stdlib,
-        cowboy,
-        thoas
-    ]},
-    {env, []},
-    {modules, []}
+    {applications, [kernel, stdlib]},
+    {env, []}
 ]}.
