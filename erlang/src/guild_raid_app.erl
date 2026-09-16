@@ -4,33 +4,39 @@
 -export([start/2, stop/1]).
 
 start(_StartType, _StartArgs) ->
-    %% 1. Definicao das Rotas da API baseadas no contrato
-    Rotas = [
-        {"/jogadores", handler_jogadores, []},
-        {"/jogadores/:id", handler_jogadores, []},
-        {"/jogadores/:id/historico", handler_jogadores, []},
-        
-        {"/raids", handler_raids, []},
-        {"/raids/:id", handler_raids, []},
-        
-        {"/raids/:id/inscricoes", handler_inscricoes, []},
-        {"/raids/:id/inscricoes/:jogadorId", handler_inscricoes, []},
-        
-        {"/raids/:id/presenca", handler_loot, []},
-        {"/raids/:id/loots", handler_loot, []},
-        {"/raids/:id/loots/:itemId/distribuir", handler_loot, []}
-    ],
+    %% 1. Inicializacao do Schema (Tabelas ETS)
+    %% set: ID unico. public: acessivel por qualquer processo. named_table: nome fixo.
+    ets:new(tb_jogadores, [set, public, named_table]),
+    ets:new(tb_raids, [set, public, named_table]),
+    ets:new(tb_inscricoes, [set, public, named_table]),
+    ets:new(tb_loots, [set, public, named_table]),
 
-    %% 2. Compila as rotas para o formato que o Cowboy entende
-    Dispatch = cowboy_router:compile([{'_', Rotas}]),
+    %% 2. Configuracao do Roteador Cowboy
+    Dispatch = cowboy_router:compile([
+        {'_', [  %% <-- O "Host Match" obrigatorio do Cowboy entra aqui!
+            {"/jogadores", handler_jogadores, []},
+            {"/jogadores/:id", handler_jogadores, []},
+            {"/jogadores/:id/historico", handler_jogadores, []},
+            
+            {"/raids", handler_raids, []},
+            {"/raids/:id", handler_raids, []},
+            
+            {"/raids/:id/inscricoes", handler_inscricoes, []},
+            {"/raids/:id/inscricoes/:jogadorId", handler_inscricoes, []},
+            
+            {"/raids/:id/presenca", handler_loot, []},
+            {"/raids/:id/loots", handler_loot, []},
+            {"/raids/:id/loots/:itemId/distribuir", handler_loot, []}
+        ]} %% <-- Fecha a lista de rotas do Host
+    ]),
 
-    %% 3. Inicia o servidor HTTP na porta 8080
+    %% 3. Iniciar o servidor HTTP (Cowboy) na porta 8080
     {ok, _} = cowboy:start_clear(http_listener,
         [{port, 8080}],
         #{env => #{dispatch => Dispatch}}
     ),
-    
-    %% Inicia o supervisor raiz da aplicacao (padrao do OTP)
+
+    %% 4. Iniciar o Supervisor principal da aplicacao OTP
     guild_raid_sup:start_link().
 
 stop(_State) ->

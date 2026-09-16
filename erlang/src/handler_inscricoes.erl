@@ -17,26 +17,23 @@ handle_request(<<"OPTIONS">>, Req) ->
 
 %% 2. Inscrever Jogador (POST)
 handle_request(<<"POST">>, Req) ->
-    %% Extrai o ID da raid diretamente da URL (ex: /raids/r1/inscricoes)
     RaidId = cowboy_req:binding(id, Req),
 
     case api_util:parse_body(Req) of
         {ok, Map, Req2} ->
-            %% O contrato exige a chave camelCase no JSON
             JogadorId = maps:get(<<"jogadorId">>, Map, <<"">>),
 
-            %% TODO Futuro com o colega:
-            %% 1. Procurar o Pid da raid 'RaidId'
-            %% 2. Enviar a mensagem para o processo concorrente:
-            %%    Pid ! {inscrever, JogadorId, self()}
-            %% 3. Fazer o receive aguardando a resposta para saber se entrou ou foi pra fila
-
-            %% Mock temporário: Simulando que o jogador entrou na vaga principal
-            %% Mude para <<"lista_espera">> para testar a interface visual do front-end
-            RespostaJson = #{
-                <<"status">> => <<"confirmado">>
-            },
-            api_util:reply_json(Req2, 200, RespostaJson);
+            %% Chama a camada de persistência. 
+            %% Nota: Temporariamente assumimos "confirmado" até a lógica de limite 
+            %% de vagas (do raid_server) ser conectada no futuro.
+            case db_ets:salvar_inscricao(RaidId, JogadorId, <<"confirmado">>) of
+                {ok, DadosInscricao} ->
+                    api_util:reply_json(Req2, 201, DadosInscricao);
+                
+                {error, duplicado} ->
+                    %% A nossa Chave Composta do ETS barrou a duplicidade perfeitamente!
+                    api_util:reply_error(Req2, 409, <<"inscricao_duplicada">>, <<"O jogador já está inscrito nesta raid.">>)
+            end;
 
         {error, invalid_json, Req2} ->
             api_util:reply_error(Req2, 400, <<"json_invalido">>, <<"O formato enviado não é um JSON válido.">>)
@@ -44,21 +41,17 @@ handle_request(<<"POST">>, Req) ->
 
 %% 3. Cancelar/Remover Inscrição (DELETE)
 handle_request(<<"DELETE">>, Req) ->
-    %% Aqui extraimos AMBOS os parametros que mapeamos no guild_raid_app.erl
     RaidId = cowboy_req:binding(id, Req),
     JogadorId = cowboy_req:binding(jogadorId, Req),
 
-    %% Evita erro caso a pessoa chame o DELETE sem o ID do jogador na URL
     case JogadorId of
         undefined ->
             api_util:reply_error(Req, 400, <<"falta_id_jogador">>, <<"O ID do jogador é obrigatório na URL.">>);
         _ ->
-            %% TODO Futuro com o colega:
-            %% 1. Enviar mensagem: Pid ! {remover, JogadorId, self()}
-            %% 2. O servidor da raid cuida sozinho de puxar o próximo da fila
+            %% Chama o repositório para deletar a chave composta {RaidId, JogadorId}
+            db_ets:remover_inscricao(RaidId, JogadorId),
             
-            %% Como é uma deleção bem-sucedida, retornamos um 200 OK genérico
-            api_util:reply_json(Req, 200, #{<<"mensagem">> => <<"Jogador removido com sucesso.">>})
+            api_util:reply_json(Req, 200, #{<<"mensagem">> => <<"Inscrição removida com sucesso.">>})
     end;
 
 %% 4. Outros Metodos Nao Suportados

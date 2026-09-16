@@ -1,4 +1,3 @@
-%%Rotas: /jogadores e /jogadores/{id}
 -module(handler_jogadores).
 
 -export([init/2]).
@@ -12,92 +11,44 @@ init(Req, State) ->
 %%% Tratamento por Metodo HTTP
 %%% ===================================================================
 
-%% 1. Preflight do CORS
 handle_request(<<"OPTIONS">>, Req) ->
     cowboy_req:reply(204, api_util:cors_headers(), Req);
 
-%% 2. Tratamento de todos os GETs (Lista, Unico e Historico)
-handle_request(<<"GET">>, Req) ->
-    %% Extrai o parametro :id da URL. Se nao existir, retorna 'undefined'
-    IdBinding = cowboy_req:binding(id, Req),
-    %% Pega o caminho completo da URL digitada no front-end
-    Path = cowboy_req:path(Req),
-
-    %% Usamos Pattern Matching para descobrir qual GET foi chamado
-    case {IdBinding, binary:match(Path, <<"/historico">>)} of
-        
-        %% Caso 1: GET /jogadores (Sem ID)
-        {undefined, nomatch} ->
-            %% TODO Futuro: Buscar lista real do ETS ou Mnesia
-            ListaMock = [
-                #{<<"id">> => <<"j1">>, <<"nome">> => <<"Aria">>, <<"classe">> => <<"guerreiro">>, <<"funcao">> => <<"tank">>},
-                #{<<"id">> => <<"j2">>, <<"nome">> => <<"Elara">>, <<"classe">> => <<"sacerdote">>, <<"funcao">> => <<"healer">>}
-            ],
-            api_util:reply_json(Req, 200, ListaMock);
-
-        %% Caso 2: GET /jogadores/:id/historico
-        {IdBin, {_, _}} when IdBin =/= undefined ->
-            %% TODO Futuro: Buscar o jogador real e chamar modulo_jogador:obter_resumo(Jogador)
-            HistoricoMock = #{
-                <<"id">> => IdBin,
-                <<"nome">> => <<"Aria">>,
-                <<"funcao">> => <<"tank">>,
-                <<"total_raids">> => 2,
-                <<"total_loots">> => 1,
-                <<"loots">> => [<<"Espada Lendária">>]
-            },
-            api_util:reply_json(Req, 200, HistoricoMock);
-
-        %% Caso 3: GET /jogadores/:id (Sem a palavra historico)
-        {IdBin, nomatch} when IdBin =/= undefined ->
-            %% TODO Futuro: Buscar o jogador real do sistema
-            JogadorMock = #{
-                <<"id">> => IdBin,
-                <<"nome">> => <<"Aria">>,
-                <<"classe">> => <<"guerreiro">>,
-                <<"funcao">> => <<"tank">>
-            },
-            api_util:reply_json(Req, 200, JogadorMock)
-    end;
-
-%% 3. Cadastro do Jogador (POST) - Versao Mock Isolada
+%% Cadastrar Jogador (POST)
 handle_request(<<"POST">>, Req) ->
     case api_util:parse_body(Req) of
         {ok, Map, Req2} ->
             IdBin = maps:get(<<"id">>, Map, <<"">>),
-            NomeBin = maps:get(<<"nome">>, Map, <<"">>),
-            ClasseBin = maps:get(<<"classe">>, Map, <<"">>),
-            FuncaoBin = maps:get(<<"funcao">>, Map, <<"">>),
-
-            %% TODO Futuro: 
-            %% Quando o servidor estiver pronto, descomentar a chamada abaixo:
-            %% Nome = binary_to_list(NomeBin),
-            %% Classe = binary_to_list(ClasseBin),
-            %% FuncaoAtomo = converter_funcao(FuncaoBin),
-            %% modulo_jogador:criar(IdBin, Nome, Classe, FuncaoAtomo)
-
-            %% Retornamos o 201 Created diretamente para liberar o Front-end
-            RespostaJson = #{
-                <<"id">> => IdBin,
-                <<"nome">> => NomeBin,
-                <<"classe">> => ClasseBin,
-                <<"funcao">> => FuncaoBin
-            },
-            api_util:reply_json(Req2, 201, RespostaJson);
             
+            case db_ets:salvar_jogador(IdBin, Map) of
+                {ok, DadosSalvos} ->
+                    api_util:reply_json(Req2, 201, DadosSalvos);
+                {error, duplicado} ->
+                    api_util:reply_error(Req2, 409, <<"id_duplicado">>, <<"O ID do jogador já está em uso.">>)
+            end;
         {error, invalid_json, Req2} ->
             api_util:reply_error(Req2, 400, <<"json_invalido">>, <<"O formato enviado não é um JSON válido.">>)
     end;
 
-%% 4. Outros Metodos Nao Suportados
+%% Listar ou Buscar Jogadores (GET)
+handle_request(<<"GET">>, Req) ->
+    JogadorId = cowboy_req:binding(id, Req),
+
+    case JogadorId of
+        undefined ->
+            %% GET /jogadores (Lista todos)
+            TodosJogadores = db_ets:listar_jogadores(),
+            api_util:reply_json(Req, 200, TodosJogadores);
+            
+        _ ->
+            %% GET /jogadores/:id (Busca um especifico)
+            case db_ets:buscar_jogador(JogadorId) of
+                {ok, DadosJogador} ->
+                    api_util:reply_json(Req, 200, DadosJogador);
+                {error, nao_encontrado} ->
+                    api_util:reply_error(Req, 404, <<"nao_encontrado">>, <<"Jogador não encontrado.">>)
+            end
+    end;
+
 handle_request(_, Req) ->
     api_util:reply_error(Req, 405, <<"metodo_nao_permitido">>, <<"Método HTTP não suportado nesta rota.">>).
-
-%%% ===================================================================
-%%% Funcoes Auxiliares Internas
-%%% ===================================================================
-
-converter_funcao(<<"tank">>) -> tank;
-converter_funcao(<<"healer">>) -> healer;
-converter_funcao(<<"dps">>) -> dps;
-converter_funcao(_) -> invalida.
