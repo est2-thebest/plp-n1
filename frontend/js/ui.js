@@ -154,6 +154,22 @@ function formularioValido(form) {
     }
   });
 
+  const campoId = form.elements.namedItem("id");
+  const formulario = form.getAttribute("id");
+  if (campoId && (formulario === "form-jogador" || formulario === "form-raid")) {
+    const id = String(campoId.value ?? "").trim();
+    if (id && !/^\d{1,4}$/.test(id)) {
+      marcarErro(campoId, "Só números, no máximo 4 dígitos.");
+      valido = false;
+    } else if (formulario === "form-jogador" && estado.jogadores.some((jogador) => jogador.id === id)) {
+      marcarErro(campoId, "Já existe um jogador com este id.");
+      valido = false;
+    } else if (formulario === "form-raid" && estado.raids.some((raid) => raid.id === id)) {
+      marcarErro(campoId, "Já existe uma raid com este id.");
+      valido = false;
+    }
+  }
+
   return valido;
 }
 
@@ -304,7 +320,11 @@ function renderHistorico(dados, jogador) {
   const raids = dados?.raids ?? [];
   const itens = dados?.itensRecebidos ?? [];
   const participacoes = dados?.quantidadeParticipacoes ?? 0;
-  el.historico.innerHTML = `<p>Participações: ${participacoes}</p><p>Raids: ${raids.length ? raids.join(", ") : "—"}</p><p>Itens: ${itens.length ? itens.map((item) => item.nome ?? item.id).join(", ") : "—"}</p>`;
+  const situacoes = dados?.situacaoNasRaids ?? [];
+  const textoSituacao = situacoes.length
+    ? situacoes.map((item) => `${item.raid}: ${item.status}`).join(", ")
+    : "—";
+  el.historico.innerHTML = `<p>Participações: ${participacoes}</p><p>Raids: ${raids.length ? raids.join(", ") : "—"}</p><p>Situação: ${textoSituacao}</p><p>Itens: ${itens.length ? itens.map((item) => item.nome ?? item.id).join(", ") : "—"}</p>`;
 }
 
 function funcaoDoItem(item) {
