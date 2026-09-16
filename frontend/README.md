@@ -1,12 +1,10 @@
 # Frontend
 
-Interface web compartilhada da N1. Fala com a API em **C#** ou em **Erlang** — a regra de negócio fica nos backends.
+Interface web compartilhada. Fala com a API em **C#** (`localhost:5000`) ou **Erlang** (`localhost:8080`). Vaga, fila e loot ficam no backend, não no JS.
 
 HTML, CSS e JS estáticos. Sem framework.
 
 ## Como abrir
-
-Ainda não há API. Para ver a página:
 
 ```bash
 cd frontend
@@ -15,21 +13,29 @@ python3 -m http.server 5500
 
 Abra http://localhost:5500
 
+Para usar o C#, a API precisa estar rodando (`dotnet run --project src/GuildRaidManager.Api` em `csharp/`). No seletor do topo escolha **C# · localhost:5000**. O banner deve dizer `Conectado em http://localhost:5000`.
+
+A API não serve HTML: `http://localhost:5000` sozinho dá 404. A tela é esta, na porta 5500.
+
+## Seletor de backend
+
+| Opção | O que faz |
+| --- | --- |
+| Mock · demo da tela | Dados locais em `js/mock.js` (Aria, Breno…). Serve para ver a UI. **Não** testa C# nem Erlang. Id de jogador e de raid: só números, até 4 dígitos. |
+| C# · localhost:5000 | `fetch` na Minimal API. A guilda começa vazia — cadastre jogadores pela tela. |
+| Erlang · localhost:8080 | Mesmo contrato HTTP, quando a API Erlang existir. |
+
 ## Estrutura
 
 ```
-js/mock.js        # dados de demo da tela
-js/api.js         # fetch (C# / Erlang / mock)
-js/ui.js          # estado, listas, filtros e validação
-js/modais.js      # cadastro, histórico e detalhe da raid
-js/navegacao.js   # duas abas: Jogadores e Raids
+js/mock.js        # demo da tela (não é backend)
+js/api.js         # fetch C# / Erlang / mock
+js/ui.js          # listas, filtros, histórico
+js/modais.js      # cadastro e detalhe da raid
+js/navegacao.js   # abas Jogadores e Raids
 js/app.js         # liga formulários e API
 ```
 
-A lista fica nas abas. Cadastro, histórico e o detalhe da raid abrem em modal.
+Listas nas abas. Cadastro, histórico e detalhe da raid abrem em modal.
 
-Quando as APIs existirem, o seletor de backend aponta para `http://localhost:5000` (C#) ou `http://localhost:8080` (Erlang), com o mesmo JSON nos dois lados.
-
-Contrato compartilhado (caminhos, JSON, CORS): [`../contrato-api.md`](../contrato-api.md).
-
-O seletor **Mock · demo da tela** carrega a massa do roteiro (Aria confirmada, Breno na fila). Remover Aria promove Breno. Isso **não** testa C# nem Erlang.
+Contrato (caminhos, JSON, CORS): [`../contrato-api.md`](../contrato-api.md). Roteiro: [`../exemplo-desenvolvimento.md`](../exemplo-desenvolvimento.md).
