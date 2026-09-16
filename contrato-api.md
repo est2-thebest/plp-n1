@@ -2,19 +2,19 @@
 
 O frontend fala **só por HTTP + JSON**. C# e Erlang expõem **os mesmos caminhos e o mesmo formato**. A regra de negócio (vaga, fila, loot) fica em cada backend, não no JS.
 
-Enquanto as APIs não existirem, o front não consegue conversar de verdade — só troca a URL base. Este arquivo é o combinado para as duas duplas implementarem depois. Roteiro com JSON de exemplo: [exemplo-desenvolvimento.md](exemplo-desenvolvimento.md).
+A API C# já está neste contrato (`csharp/src/GuildRaidManager.Api`). A HTTP Erlang ainda não. Roteiro com JSON de exemplo: [exemplo-desenvolvimento.md](exemplo-desenvolvimento.md).
 
 ## URLs
 
 | Backend | Base | Quem sobe |
 | --- | --- | --- |
-| C# | `http://localhost:5000` | ASP.NET (projeto API, ainda não criado) |
+| C# | `http://localhost:5000` | `dotnet run --project src/GuildRaidManager.Api` em `csharp/` |
 | Erlang | `http://localhost:8080` | HTTP na frente do `raid_server` (ainda não criado) |
 | Front | `http://localhost:5500` | `python3 -m http.server 5500` em `frontend/` |
 
 Os dois backends precisam liberar CORS para `http://localhost:5500` (browser bloqueia senão).
 
-JSON em UTF-8. Enums **sempre em minúsculo** no JSON, nos dois lados:
+JSON em UTF-8. Id de **jogador** e de **raid**: somente números, 1 a 4 dígitos (`1`, `10`, `9999`). Enums **sempre em minúsculo** no JSON, nos dois lados:
 
 - função: `tank` | `healer` | `dps`
 - status: `confirmado` | `lista_espera` | `cancelado`
@@ -35,14 +35,14 @@ Códigos: `200` ok, `201` criado, `400` regra de negócio / validação, `404` n
 `POST /jogadores`
 
 ```json
-{ "id": "j1", "nome": "Aria", "classe": "guerreiro", "funcao": "tank" }
+{ "id": "1", "nome": "Aria", "classe": "guerreiro", "funcao": "tank" }
 ```
 
 Resposta `201`: o jogador criado.
 
 `GET /jogadores` — lista  
 `GET /jogadores/{id}` — um jogador  
-`GET /jogadores/{id}/historico` — raids participadas, quantidade, itens recebidos
+`GET /jogadores/{id}/historico` — raids participadas, quantidade, itens recebidos e `situacaoNasRaids` (`participou` / `confirmado` / `lista_espera`)
 
 ### Raids (RF02)
 
@@ -50,7 +50,7 @@ Resposta `201`: o jogador criado.
 
 ```json
 {
-  "id": "r1",
+  "id": "10",
   "nome": "Naxxramas",
   "data": "2026-09-20T21:00:00",
   "limiteTank": 2,
@@ -67,7 +67,7 @@ Resposta `201`: o jogador criado.
 `POST /raids/{id}/inscricoes`
 
 ```json
-{ "jogadorId": "j1" }
+{ "jogadorId": "1" }
 ```
 
 Resposta: inscrição com `status` `confirmado` ou `lista_espera`.  
@@ -80,7 +80,7 @@ Se já inscrito: `400` com `erro: "ja_inscrito"`.
 `POST /raids/{id}/presenca`
 
 ```json
-{ "jogadorIds": ["j1", "j2"] }
+{ "jogadorIds": ["1", "2"] }
 ```
 
 Só confirmados viram participantes efetivos.
@@ -103,7 +103,7 @@ Só confirmados viram participantes efetivos.
 
 Não copiar regra de vaga/fila/loot para o JavaScript. Se C# e Erlang divergirem no JSON, o front quebra e a comparação da N1 deixa de valer.
 
-O esqueleto de `fetch` já está em `frontend/js/api.js`, alinhado a estes caminhos. Vai falhar no browser até o passo 2 existir — isso é esperado.
+O `fetch` está em `frontend/js/api.js`. Com o seletor em C# e a API no ar, os caminhos deste arquivo já funcionam. Erlang ainda precisa da camada HTTP (`:8080`).
 
 ## Cabe nas duas linguagens?
 

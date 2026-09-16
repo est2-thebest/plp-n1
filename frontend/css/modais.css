@@ -1,0 +1,51 @@
+.modal {
+  width: min(36rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 3rem);
+  overflow: auto;
+  padding: 1.15rem 1.2rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.modal[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal--wide {
+  width: min(52rem, calc(100vw - 2rem));
+}
+
+.modal::backdrop {
+  background: rgba(36, 28, 22, 0.55);
+}
+
+.modal__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.modal .banner {
+  max-width: none;
+  margin: 0 0 0.85rem;
+}
+
+.modal .form .btn {
+  margin-top: 1.15rem;
+}
+
+.modal .form--grade .btn {
+  margin-top: 0.25rem;
+}

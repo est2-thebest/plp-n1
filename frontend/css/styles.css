@@ -1,16 +1,4 @@
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: sans-serif;
-  line-height: 1.4;
-}
-
-header,
-main {
-  max-width: 40rem;
-  margin: 0 auto;
-  padding: 1rem;
-}
+@import url("tokens.css");
+@import url("layout.css");
+@import url("components.css");
+@import url("modais.css");
