@@ -4,28 +4,28 @@ function copiar(valor) {
 
 function cenarioInicial() {
   const jogadores = [
-    { id: "tank-1", nome: "Aria", classe: "guerreiro", funcao: "tank" },
-    { id: "tank-2", nome: "Breno", classe: "paladino", funcao: "tank" },
-    { id: "heal-1", nome: "Cora", classe: "sacerdote", funcao: "healer" },
-    { id: "dps-1", nome: "Davi", classe: "mago", funcao: "dps" },
-    { id: "dps-2", nome: "Eva", classe: "ladino", funcao: "dps" },
+    { id: "1", nome: "Aria", classe: "guerreiro", funcao: "tank" },
+    { id: "2", nome: "Breno", classe: "paladino", funcao: "tank" },
+    { id: "3", nome: "Cora", classe: "sacerdote", funcao: "healer" },
+    { id: "4", nome: "Davi", classe: "mago", funcao: "dps" },
+    { id: "5", nome: "Eva", classe: "ladino", funcao: "dps" },
   ];
 
   const raid = {
-    id: "r1",
+    id: "10",
     nome: "Naxxramas",
     data: "2026-09-20T21:00:00",
     limiteTank: 1,
     limiteHealer: 1,
     limiteDps: 1,
     confirmados: [
-      { jogadorId: "tank-1", status: "confirmado" },
-      { jogadorId: "heal-1", status: "confirmado" },
-      { jogadorId: "dps-1", status: "confirmado" },
+      { jogadorId: "1", status: "confirmado" },
+      { jogadorId: "3", status: "confirmado" },
+      { jogadorId: "4", status: "confirmado" },
     ],
     fila: [
-      { jogadorId: "dps-2", status: "lista_espera" },
-      { jogadorId: "tank-2", status: "lista_espera" },
+      { jogadorId: "5", status: "lista_espera" },
+      { jogadorId: "2", status: "lista_espera" },
     ],
     participantesEfetivos: [],
     loots: [],
@@ -87,6 +87,9 @@ const mockApi = {
   listarJogadores: () => copiar(mock.dados.jogadores),
 
   cadastrarJogador(jogador) {
+    if (!/^\d{1,4}$/.test(String(jogador.id ?? "").trim())) {
+      throw new Error("Id deve ter somente números, no máximo 4 dígitos.");
+    }
     if (!jogador.nome?.trim()) {
       throw new Error("Nome do jogador inválido.");
     }
@@ -108,11 +111,27 @@ const mockApi = {
     const itensRecebidos = mock.dados.raids.flatMap((raid) =>
       raid.loots.filter((item) => item.ganhadorId === id),
     );
+    const situacaoNasRaids = mock.dados.raids
+      .map((raid) => {
+        if (raid.participantesEfetivos.includes(id)) {
+          return { raid: raid.nome, status: "participou" };
+        }
+        if (raid.confirmados.some((item) => item.jogadorId === id)) {
+          return { raid: raid.nome, status: "confirmado" };
+        }
+        if (raid.fila.some((item) => item.jogadorId === id)) {
+          return { raid: raid.nome, status: "lista_espera" };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
     return {
       jogadorId: id,
       quantidadeParticipacoes: participou.length,
       raids: participou.map((raid) => raid.nome),
       itensRecebidos: itensRecebidos.map((item) => ({ id: item.id, nome: item.nome })),
+      situacaoNasRaids,
     };
   },
 
@@ -120,6 +139,12 @@ const mockApi = {
   obterRaid: (id) => copiar(mock.raid(id)),
 
   criarRaid(raid) {
+    if (!/^\d{1,4}$/.test(String(raid.id ?? "").trim())) {
+      throw new Error("Id deve ter somente números, no máximo 4 dígitos.");
+    }
+    if (mock.dados.raids.some((item) => item.id === raid.id)) {
+      throw new Error("Raid já cadastrada.");
+    }
     if (raid.limiteTank < 0 || raid.limiteHealer < 0 || raid.limiteDps < 0) {
       throw new Error("Limites de vagas não podem ser negativos.");
     }

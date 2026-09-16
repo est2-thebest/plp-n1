@@ -1,3 +1,4 @@
+// Esqueleto de console. O núcleo da N1/N2 roda na API (src/GuildRaidManager.Api), não aqui.
 var jogadores = new List<object>();
 var raids = new List<object>();
 var encerrar = false;

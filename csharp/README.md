@@ -23,13 +23,18 @@ Na pasta `csharp/`:
 dotnet restore
 dotnet build
 dotnet test
-dotnet run --project src/GuildRaidManager.App
+dotnet run --project src/GuildRaidManager.Api
 ```
+
+A API sobe em `http://localhost:5000`, com CORS para o front em `http://localhost:5500`. O contrato HTTP está em [`../contrato-api.md`](../contrato-api.md).
+
+O console em `src/GuildRaidManager.App` ainda é um esqueleto; o núcleo da N1 está no domínio + API.
 
 ## Estrutura
 
 ```
-src/GuildRaidManager.Domain   # biblioteca de domínio
-src/GuildRaidManager.App      # aplicativo console
-tests/                        # testes xUnit
+src/GuildRaidManager.Domain   # POO: Jogador, Raid, Guilda, ServicoDistribuicaoLoot
+src/GuildRaidManager.Api      # Minimal API HTTP (contrato compartilhado)
+src/GuildRaidManager.App      # aplicativo console (esqueleto)
+tests/                        # testes xUnit do domínio
 ```
