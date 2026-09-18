@@ -1,3 +1,4 @@
+%% coding: utf-8
 -module(handler_inscricoes).
 
 -export([init/2]).
@@ -32,11 +33,11 @@ handle_request(<<"POST">>, Req) ->
                 
                 {error, duplicado} ->
                     %% A nossa Chave Composta do ETS barrou a duplicidade perfeitamente!
-                    api_util:reply_error(Req2, 409, <<"inscricao_duplicada">>, <<"O jogador já está inscrito nesta raid.">>)
+                    api_util:reply_error(Req2, 409, <<"inscricao_duplicada">>, <<"O jogador já está inscrito nesta raid."/utf8>>)
             end;
 
         {error, invalid_json, Req2} ->
-            api_util:reply_error(Req2, 400, <<"json_invalido">>, <<"O formato enviado não é um JSON válido.">>)
+            api_util:reply_error(Req2, 400, <<"json_invalido">>, <<"O formato enviado não é um JSON válido."/utf8>>)
     end;
 
 %% 3. Cancelar/Remover Inscrição (DELETE)
@@ -46,14 +47,14 @@ handle_request(<<"DELETE">>, Req) ->
 
     case JogadorId of
         undefined ->
-            api_util:reply_error(Req, 400, <<"falta_id_jogador">>, <<"O ID do jogador é obrigatório na URL.">>);
+            api_util:reply_error(Req, 400, <<"falta_id_jogador">>, <<"O ID do jogador é obrigatório na URL."/utf8>>);
         _ ->
             %% Chama o repositório para deletar a chave composta {RaidId, JogadorId}
             db_ets:remover_inscricao(RaidId, JogadorId),
             
-            api_util:reply_json(Req, 200, #{<<"mensagem">> => <<"Inscrição removida com sucesso.">>})
+            api_util:reply_json(Req, 200, #{<<"mensagem">> => <<"Inscrição removida com sucesso."/utf8>>})
     end;
 
 %% 4. Outros Metodos Nao Suportados
 handle_request(_, Req) ->
-    api_util:reply_error(Req, 405, <<"metodo_nao_permitido">>, <<"Método HTTP não suportado nesta rota.">>).
+    api_util:reply_error(Req, 405, <<"metodo_nao_permitido">>, <<"Método HTTP não suportado nesta rota."/utf8>>).

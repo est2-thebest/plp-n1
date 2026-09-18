@@ -1,3 +1,4 @@
+%% coding: utf-8
 -module(handler_jogadores).
 
 -export([init/2]).
@@ -24,10 +25,10 @@ handle_request(<<"POST">>, Req) ->
                 {ok, DadosSalvos} ->
                     api_util:reply_json(Req2, 201, DadosSalvos);
                 {error, duplicado} ->
-                    api_util:reply_error(Req2, 409, <<"id_duplicado">>, <<"O ID do jogador já está em uso.">>)
+                    api_util:reply_error(Req2, 409, <<"id_duplicado">>, <<"O ID do jogador já está em uso."/utf8>>)
             end;
         {error, invalid_json, Req2} ->
-            api_util:reply_error(Req2, 400, <<"json_invalido">>, <<"O formato enviado não é um JSON válido.">>)
+            api_util:reply_error(Req2, 400, <<"json_invalido">>, <<"O formato enviado não é um JSON válido."/utf8>>)
     end;
 
 %% Listar ou Buscar Jogadores (GET)
@@ -46,9 +47,9 @@ handle_request(<<"GET">>, Req) ->
                 {ok, DadosJogador} ->
                     api_util:reply_json(Req, 200, DadosJogador);
                 {error, nao_encontrado} ->
-                    api_util:reply_error(Req, 404, <<"nao_encontrado">>, <<"Jogador não encontrado.">>)
+                    api_util:reply_error(Req, 404, <<"nao_encontrado">>, <<"Jogador não encontrado."/utf8>>)
             end
     end;
 
 handle_request(_, Req) ->
-    api_util:reply_error(Req, 405, <<"metodo_nao_permitido">>, <<"Método HTTP não suportado nesta rota.">>).
+    api_util:reply_error(Req, 405, <<"metodo_nao_permitido">>, <<"Método HTTP não suportado nesta rota."/utf8>>).

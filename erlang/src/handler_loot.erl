@@ -1,3 +1,4 @@
+%% coding: utf-8
 -module(handler_loot).
 
 -export([init/2]).
@@ -23,7 +24,7 @@ handle_request(<<"POST">>, Req) ->
     case binary:match(Path, <<"loots">>) of
         nomatch ->
             %% Rota de Presenca (POST /raids/:id/presenca)
-            api_util:reply_json(Req, 200, #{<<"mensagem">> => <<"Lista de presença processada.">>});
+            api_util:reply_json(Req, 200, #{<<"mensagem">> => <<"Lista de presença processada."/utf8>>});
             
         _ ->
             %% Rota de Loots (POST /raids/:id/loots)
@@ -36,11 +37,11 @@ handle_request(<<"POST">>, Req) ->
                         {ok, DadosLoot} ->
                             api_util:reply_json(Req2, 201, DadosLoot);
                         {error, duplicado} ->
-                            api_util:reply_error(Req2, 409, <<"loot_duplicado">>, <<"Este item já foi registrado nesta raid.">>)
+                            api_util:reply_error(Req2, 409, <<"loot_duplicado">>, <<"Este item já foi registrado nesta raid."/utf8>>)
                     end;
                     
                 {error, invalid_json, Req2} ->
-                    api_util:reply_error(Req2, 400, <<"json_invalido">>, <<"O formato enviado não é um JSON válido.">>)
+                    api_util:reply_error(Req2, 400, <<"json_invalido">>, <<"O formato enviado não é um JSON válido."/utf8>>)
             end
     end;
 
@@ -53,4 +54,4 @@ handle_request(<<"GET">>, Req) ->
     api_util:reply_json(Req, 200, LootsDaRaid);
 
 handle_request(_, Req) ->
-    api_util:reply_error(Req, 405, <<"metodo_nao_permitido">>, <<"Método HTTP não suportado nesta rota.">>).
+    api_util:reply_error(Req, 405, <<"metodo_nao_permitido">>, <<"Método HTTP não suportado nesta rota."/utf8>>).
